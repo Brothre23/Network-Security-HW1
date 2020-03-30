@@ -24,7 +24,12 @@ public:
 private:
     struct addrinfo hints;
     struct addrinfo *server_info;
+    struct sockaddr_in client_addr;
+    socklen_t addr_len;
     int socket_fd, clients[CONNMAX];
+    int client_index;
+    char *port;
+
     void receive(int client_index);
 };
 
