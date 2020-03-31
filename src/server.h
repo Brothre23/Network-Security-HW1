@@ -13,6 +13,8 @@
 #include <fcntl.h>
 #include <signal.h>
 
+#include "request.h"
+
 #define CONNMAX 1000
 
 class Server
@@ -30,7 +32,11 @@ private:
     int client_index;
     char *port;
 
+    size_t buffer_len;
+    char *buffer;
+
     void receive(int client_index);
+    void print_request(Request *request, int client_fd);
 };
 
 #endif
