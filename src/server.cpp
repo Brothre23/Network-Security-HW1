@@ -50,7 +50,7 @@ void Server::start_server()
         fprintf(stderr, "failed to enter listening status.\n");
         exit(1);
     }
-    printf("listen http://127.0.0.1:%s...\n", port);
+    printf("listening on http://127.0.0.1:%s...\n\n", port);
 
     while(1)
     {
@@ -61,13 +61,76 @@ void Server::start_server()
             fprintf(stderr, "connection with clients failed.\n");
         else
         { 
-            // child process
+/*             // child process
             if (fork() == 0)
             {
-                receive(client_index);
+                Request *request = receive(client_index);
+                exit(0);
+            } */
+            Request *request = receive(client_index);
+
+            if (pipe(toCGI) < 0)
+            {
+                fprintf(stderr, "failed to establish pipe.");
+                exit(EXIT_FAILURE);
+            }
+            if (pipe(fromCGI) < 0)
+            {
+                fprintf(stderr, "failed to establish pipe.");
+                exit(EXIT_FAILURE);
+            }
+            if ((cpid = fork()) < 0)
+            {
+                fprintf(stderr, "failed to fork.");
+                exit(EXIT_FAILURE);
+            }
+
+            // child process
+            if (cpid == 0)
+            {
+                close(toCGI[1]);
+                close(fromCGI[0]);
+
+                // redirect the output from stdout to fromCGI
+                dup2(fromCGI[1], STDOUT_FILENO);
+                //redirect the input from stdin to toCGI
+                dup2(toCGI[0], STDIN_FILENO);
+
+                close(fromCGI[1]);
+                close(toCGI[0]);
+
+                execlp("./build/cgi", "cgi-meow", NULL);
                 exit(0);
             }
+            // parent process
+            else
+            {
+                close(toCGI[0]);
+                close(fromCGI[1]);
+
+                // send the message to the CGI program
+                write(toCGI[1], input_data, strlen(input_data));
+
+                // waitpid(cpid, &process_state, 0);
+
+                // receive the message from the  CGI program
+                while(read(fromCGI[0], &c, 1) > 0)
+                {
+                    // write the message to client
+                    write(clients[client_index], &c, 1);
+                }
+
+                write(clients[client_index], "\n", 1);
+
+                close(fromCGI[0]);
+                close(toCGI[1]);
+                waitpid(cpid, &process_state, 0);
+            }
         }
+
+        shutdown(clients[client_index], SHUT_RDWR);
+        close(clients[client_index]);
+        clients[client_index] = -1;
 
         // find available client numbers
         while (clients[client_index] != -1)
@@ -75,27 +138,27 @@ void Server::start_server()
     }
 }
 
-void Server::receive(int client_index)
+Request* Server::receive(int client_index)
 {
-    buffer = (char *)malloc(65535);
-    buffer_len = recv(clients[client_index], buffer, 65535, 0);
+    Request *request;
 
-    if (buffer_len < 0)
+    buffer = (char *)malloc(65535);
+    buffer_length = read(clients[client_index], buffer, 65535);
+
+    if (buffer_length < 0)
         fprintf(stderr, "failed to receive data.\n");
-    else if (buffer_len == 0)
+    else if (buffer_length == 0)
         fprintf(stderr, "client disconnected upexpectedly.\n");
     else
     {
-        buffer[buffer_len] = '\0';
-        Request request = Request(buffer, buffer_len);
-        print_request(&request, clients[client_index]);
+        buffer[buffer_length] = '\0';
+        request = new Request(buffer, buffer_length);
+        // print_response(request, clients[client_index]);
     }
-    shutdown(clients[client_index], SHUT_RDWR);
-    close(clients[client_index]);
-    clients[client_index] = -1;
+    return request;
 }
 
-void Server::print_request(Request *request, int client_fd)
+/* void Server::print_response(Request *request, int client_fd)
 {
     if (request == NULL)
         dprintf(client_fd, "HTTP/1.1 500 Error\r\n\r\n");
@@ -118,6 +181,4 @@ void Server::print_request(Request *request, int client_fd)
     }
     else
         dprintf(client_fd, "HTTP/1.1 404 Not Found\r\n\r\n");
-}
-
-// dprintf(client_fd, "Server: Apache/2.2.14 (Win32)\r\n");
+} */

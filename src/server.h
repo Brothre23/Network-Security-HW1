@@ -32,11 +32,17 @@ private:
     int client_index;
     char *port;
 
-    size_t buffer_len;
+    size_t buffer_length;
     char *buffer;
 
-    void receive(int client_index);
-    void print_request(Request *request, int client_fd);
+    int toCGI[2], fromCGI[2];
+    char *input_data = {"Hello World!"};
+    char c;
+    int process_state;
+    int cpid;
+
+    Request* receive(int client_index);
+    // void print_response(Request *request, int client_fd);
 };
 
 #endif
