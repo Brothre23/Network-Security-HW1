@@ -13,7 +13,7 @@
 #include <fcntl.h>
 #include <signal.h>
 
-#include "request.h"
+// #include "request.h"
 
 #define CONNMAX 1000
 
@@ -36,12 +36,12 @@ private:
     char *buffer;
 
     int toCGI[2], fromCGI[2];
-    char *input_data = {"Hello World!"};
+    const char *input_data = {"Hello World!"};
     char c;
     int process_state;
     int cpid;
 
-    Request* receive(int client_index);
+    void receive(int client_index);
     // void print_response(Request *request, int client_fd);
 };
 

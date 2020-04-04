@@ -13,7 +13,7 @@ public:
 
     std::string protocol;
     std::string method;
-    std::string uri;
+    std::string url;
     std::string qs;
 
     char *header_name, *header_value;

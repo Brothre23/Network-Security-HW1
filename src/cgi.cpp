@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <sys/ioctl.h>
 
+#include "request.h"
+
+#include <string>
+#include <fstream>
+
 /*
 Please make sure you understand host.c
 */
@@ -11,6 +16,8 @@ int main(void)
 {
     int unread;
     char *buf;
+
+    char ch;
 
     // fprintf(stderr, "\nMEOW\n");
     // wait for stdin
@@ -27,6 +34,8 @@ int main(void)
     // read from stdin fd
     read(STDIN_FILENO, buf, unread);
 
+    Request response(buf, strlen(buf));
+
     // output to stdout
     printf("HTTP/1.1 200 OK\r\n");
     printf("Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n");
@@ -35,5 +44,22 @@ int main(void)
     printf("Content-Type: text/html\r\n");
     printf("Connection: Closed\r\n");
     printf("\r\n");
-    printf("<html><body> <h1>Hello, World!</h1> </body></html>\r\n");
+    // printf("<html><body> <h1>Hello, World!</h1> </body></html>\r\n");
+    if (response.method == "GET")
+    {
+        if (response.url == "form")
+        {
+            std::ifstream web;
+            web.open("./form.html");
+            while (!web.eof())
+            {
+                web.get(ch);
+                printf("%c", ch);
+            }
+        }
+        else 
+            printf("<html><body> Hello World! <br> %s <br> %s </body></html>\r\n", response.url.c_str(), response.qs.c_str());
+    }
+    if (response.method == "POST")
+        printf("%s", response.payload);
 }

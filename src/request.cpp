@@ -6,15 +6,25 @@ Request::Request(char *buffer, size_t buffer_length)
 
     // parse protocol
     method = strtok(buffer, " \t\r\n");
-    uri = strtok(NULL, " \t");
+    url = strtok(NULL, " \t");
     protocol = strtok(NULL, " \t\r\n");
 
+    url = url.substr(1);
+
+    if (int pos = url.find("?"); pos != std::string::npos)
+    {
+        qs = url.substr(pos + 1);
+        url = url.substr(0, pos);
+    }
+
+    /*     
     if (int pos = uri.find("?"); pos != std::string::npos)
     {
         qs = uri.substr(pos, uri.length());
         uri = uri.substr(0, pos);
-    }
-    fprintf(stdout, "[%s] %s %s\n", method.c_str(), protocol.c_str(), uri.c_str());
+    } 
+    */
+    fprintf(stderr, "[%s] %s %s\n", method.c_str(), protocol.c_str(), url.c_str());
 
     // parse header
     while (true)
@@ -27,7 +37,7 @@ Request::Request(char *buffer, size_t buffer_length)
         while (*header_value && *header_value == ' ')
             header_value++;
         this->headers[header_name] = header_value;
-        fprintf(stdout, "[%s]: %s\n", header_name, header_value);
+        fprintf(stderr, "[%s]: %s\n", header_name, header_value);
 
         remain_data = header_value + strlen(header_value) + 1 + 1; // + strlen + \0 + \n
         // blank line which contains "\r\n" is used to seperate header and body
@@ -45,10 +55,10 @@ Request::Request(char *buffer, size_t buffer_length)
         else
             payload_size = buffer_length - (payload - buffer);
         payload[payload_size + 1] = '\0';
-        fprintf(stdout, "[PAYLOAD] %s\n", payload);
-        /* fprintf(stdout, "[PAYLOAD]\n");
+        fprintf(stderr, "[PAYLOAD] %s\n", payload);
+        /* fprintf(stderr, "[PAYLOAD]\n");
         for (int i = 0; i < payload_size; i++)
-            fprintf(stdout, "%c", payload[i]); */
+            fprintf(stderr, "%c", payload[i]); */
     }
-    fprintf(stdout, "\n");
+    fprintf(stderr, "\n");
 };

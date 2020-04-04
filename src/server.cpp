@@ -61,13 +61,15 @@ void Server::start_server()
             fprintf(stderr, "connection with clients failed.\n");
         else
         { 
-/*             // child process
+/*          // child process
             if (fork() == 0)
             {
                 Request *request = receive(client_index);
                 exit(0);
             } */
-            Request *request = receive(client_index);
+            // Request *request = receive(client_index);
+
+            receive(client_index);
 
             if (pipe(toCGI) < 0)
             {
@@ -109,9 +111,9 @@ void Server::start_server()
                 close(fromCGI[1]);
 
                 // send the message to the CGI program
-                write(toCGI[1], input_data, strlen(input_data));
+                write(toCGI[1], buffer, buffer_length);
 
-                // waitpid(cpid, &process_state, 0);
+                waitpid(cpid, &process_state, 0);
 
                 // receive the message from the  CGI program
                 while(read(fromCGI[0], &c, 1) > 0)
@@ -138,9 +140,9 @@ void Server::start_server()
     }
 }
 
-Request* Server::receive(int client_index)
+void Server::receive(int client_index)
 {
-    Request *request;
+    // Request *request;
 
     buffer = (char *)malloc(65535);
     buffer_length = read(clients[client_index], buffer, 65535);
@@ -152,10 +154,10 @@ Request* Server::receive(int client_index)
     else
     {
         buffer[buffer_length] = '\0';
-        request = new Request(buffer, buffer_length);
+        // request = new Request(buffer, buffer_length);
         // print_response(request, clients[client_index]);
     }
-    return request;
+    // return buffer;
 }
 
 /* void Server::print_response(Request *request, int client_fd)
