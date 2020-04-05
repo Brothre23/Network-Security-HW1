@@ -13,14 +13,12 @@
 #include <fcntl.h>
 #include <signal.h>
 
-// #include "request.h"
-
 #define CONNMAX 1000
 
 class Server
 {
 public:
-    Server(char *port);
+    Server(const char *port);
     void start_server();
 
 private:
@@ -30,7 +28,7 @@ private:
     socklen_t addr_len;
     int socket_fd, clients[CONNMAX];
     int client_index;
-    char *port;
+    const char *port;
 
     size_t buffer_length;
     char *buffer;
@@ -42,7 +40,6 @@ private:
     int cpid;
 
     void receive(int client_index);
-    // void print_response(Request *request, int client_fd);
 };
 
 #endif

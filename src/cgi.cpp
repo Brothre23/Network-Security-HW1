@@ -15,11 +15,10 @@ Please make sure you understand host.c
 int main(void)
 {
     int unread;
-    char *buf;
+    char *buffer;
 
     char ch;
 
-    // fprintf(stderr, "\nMEOW\n");
     // wait for stdin
     while (unread < 1)
     {
@@ -29,12 +28,12 @@ int main(void)
             exit(EXIT_FAILURE);
         }
     }
-    buf = (char *)malloc(sizeof(char) * (unread + 1));
+    buffer = (char *)malloc(sizeof(char) * (unread + 1));
 
     // read from stdin fd
-    read(STDIN_FILENO, buf, unread);
+    read(STDIN_FILENO, buffer, unread);
 
-    Request response(buf, strlen(buf));
+    Request response(buffer, strlen(buffer));
 
     // output to stdout
     printf("HTTP/1.1 200 OK\r\n");
@@ -44,7 +43,7 @@ int main(void)
     printf("Content-Type: text/html\r\n");
     printf("Connection: Closed\r\n");
     printf("\r\n");
-    // printf("<html><body> <h1>Hello, World!</h1> </body></html>\r\n");
+    
     if (response.method == "GET")
     {
         if (response.url == "form")

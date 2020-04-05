@@ -1,6 +1,6 @@
 #include "server.h"
 
-Server::Server(char *port)
+Server::Server(const char *port)
 {
     this->port = port;
 
@@ -61,14 +61,6 @@ void Server::start_server()
             fprintf(stderr, "connection with clients failed.\n");
         else
         { 
-/*          // child process
-            if (fork() == 0)
-            {
-                Request *request = receive(client_index);
-                exit(0);
-            } */
-            // Request *request = receive(client_index);
-
             receive(client_index);
 
             if (pipe(toCGI) < 0)
@@ -126,7 +118,6 @@ void Server::start_server()
 
                 close(fromCGI[0]);
                 close(toCGI[1]);
-                waitpid(cpid, &process_state, 0);
             }
         }
 
@@ -142,8 +133,6 @@ void Server::start_server()
 
 void Server::receive(int client_index)
 {
-    // Request *request;
-
     buffer = (char *)malloc(65535);
     buffer_length = read(clients[client_index], buffer, 65535);
 
@@ -152,35 +141,5 @@ void Server::receive(int client_index)
     else if (buffer_length == 0)
         fprintf(stderr, "client disconnected upexpectedly.\n");
     else
-    {
         buffer[buffer_length] = '\0';
-        // request = new Request(buffer, buffer_length);
-        // print_response(request, clients[client_index]);
-    }
-    // return buffer;
 }
-
-/* void Server::print_response(Request *request, int client_fd)
-{
-    if (request == NULL)
-        dprintf(client_fd, "HTTP/1.1 500 Error\r\n\r\n");
-    else if (request->uri == "/" && request->method == "GET")
-    {
-        dprintf(client_fd, "HTTP/1.1 200 OK\r\n");
-        dprintf(client_fd, "Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n");
-        dprintf(client_fd, "Server: Meow_Server/1.0 (Mac)\r\n");
-        dprintf(client_fd, "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT Content-Length: 88\r\n");
-        dprintf(client_fd, "Content-Type: text/html\r\n");
-        dprintf(client_fd, "Connection: Closed\r\n");
-        dprintf(client_fd, "\r\n");
-        dprintf(client_fd, "<html><body> <h1>Hello, World!</h1> </body></html>\r\n");
-    }
-    else if (request->uri == "/" && request->method == "POST")
-    {
-        dprintf(client_fd, "HTTP/1.1 200 OK\r\n\r\n");
-        dprintf(client_fd, "Wow, seems that you POSTed %lu bytes. \r\n", request->payload_size);
-        dprintf(client_fd, "Fetch the data using `payload` variable.");
-    }
-    else
-        dprintf(client_fd, "HTTP/1.1 404 Not Found\r\n\r\n");
-} */
