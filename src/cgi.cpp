@@ -14,7 +14,7 @@ Please make sure you understand host.c
 
 int main(void)
 {
-    int unread;
+    int unread = 0;
     char *buffer;
 
     char ch;
@@ -36,14 +36,14 @@ int main(void)
     Request response(buffer, strlen(buffer));
 
     // output to stdout
-    printf("HTTP/1.1 200 OK\r\n");
+    /* printf("HTTP/1.1 200 OK\r\n");
     printf("Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n");
     printf("Server: Meow_Server/1.0 (Mac)\r\n");
     printf("Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT Content-Length: 88\r\n");
     printf("Content-Type: text/html\r\n");
     printf("Connection: Closed\r\n");
-    printf("\r\n");
-    
+    printf("\r\n"); */
+
     if (response.method == "GET")
     {
         if (response.url == "form")

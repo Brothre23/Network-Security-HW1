@@ -6,6 +6,7 @@ all: ./build/server ./build/cgi
 clean:
 	@rm -rf ./build/*.o
 	@rm -rf ./build/server
+	@rm -rf ./build/cgi
 
 ./build/server: ./build/main.o ./build/server.o ./build/request.o
 	$(CC) $(CXXFLAGS) -o ./build/server $^
